@@ -9,6 +9,96 @@ const closeButton = document.querySelector("[data-dialog-close]");
 let currentGallery = [];
 let currentImageIndex = -1;
 
+const heroArt = document.querySelector(".hero-art");
+if (heroArt && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  const heroShape = heroArt.querySelector(".hero-art-shape");
+  if (!heroShape) throw new Error("Hero portrait container is missing its animated circle.");
+
+  let targetX = 0;
+  let targetY = 0;
+  let currentX = 0;
+  let currentY = 0;
+  let animationFrame = 0;
+
+  function easeHeroCircle() {
+    currentX += (targetX - currentX) * 0.075;
+    currentY += (targetY - currentY) * 0.075;
+    if (Math.abs(targetX - currentX) < 0.1) currentX = targetX;
+    if (Math.abs(targetY - currentY) < 0.1) currentY = targetY;
+
+    heroArt.style.setProperty("--offset-x", `${currentX.toFixed(2)}px`);
+    heroArt.style.setProperty("--offset-y", `${currentY.toFixed(2)}px`);
+
+    if (currentX !== targetX || currentY !== targetY) {
+      animationFrame = requestAnimationFrame(easeHeroCircle);
+    } else {
+      animationFrame = 0;
+    }
+  }
+
+  function moveHeroCircle(event) {
+    if (event.pointerType === "touch") return;
+    const bounds = heroArt.getBoundingClientRect();
+    const diameter = heroShape.getBoundingClientRect().width;
+    const maxX = Math.max(0, (bounds.width - diameter) / 2);
+    const maxY = Math.max(0, (bounds.height - diameter) / 2);
+    targetX = Math.max(-maxX, Math.min(maxX, event.clientX - bounds.left - bounds.width / 2));
+    targetY = Math.max(-maxY, Math.min(maxY, event.clientY - bounds.top - bounds.height / 2));
+    if (!animationFrame) animationFrame = requestAnimationFrame(easeHeroCircle);
+  }
+
+  function centerHeroCircle() {
+    targetX = 0;
+    targetY = 0;
+    if (!animationFrame) animationFrame = requestAnimationFrame(easeHeroCircle);
+  }
+
+  heroArt.addEventListener("pointermove", moveHeroCircle);
+  heroArt.addEventListener("pointerleave", centerHeroCircle);
+}
+
+const heroName = document.querySelector(".hero-name");
+const heroSelection = heroName?.querySelector(".hero-name-selection");
+if (heroName && heroSelection) {
+  let activeLetter = null;
+
+  function selectHeroLetter(letter) {
+    if (letter === activeLetter) return;
+    activeLetter?.classList.remove("is-active");
+    activeLetter = letter;
+    if (!activeLetter) {
+      heroSelection.classList.remove("is-visible");
+      return;
+    }
+
+    activeLetter.classList.add("is-active");
+    const nameBounds = heroName.getBoundingClientRect();
+    const letterBounds = activeLetter.getBoundingClientRect();
+    heroSelection.style.left = `${letterBounds.left - nameBounds.left - 4}px`;
+    heroSelection.style.top = `${letterBounds.top - nameBounds.top - 3}px`;
+    heroSelection.style.width = `${letterBounds.width + 8}px`;
+    heroSelection.style.height = `${letterBounds.height + 6}px`;
+    heroSelection.dataset.label = `${activeLetter.textContent} / ${Math.round(letterBounds.height)}px`;
+    heroSelection.classList.add("is-visible");
+  }
+
+  heroName.addEventListener("pointermove", (event) => {
+    if (event.pointerType === "touch") return;
+    const target = document.elementFromPoint(event.clientX, event.clientY);
+    selectHeroLetter(target?.closest(".hero-name-letter") ?? null);
+  });
+
+  heroName.addEventListener("pointerleave", () => selectHeroLetter(null));
+  heroName.addEventListener("click", (event) => {
+    const letter = event.target.closest(".hero-name-letter");
+    if (!letter) return;
+    letter.classList.remove("is-kicked");
+    void letter.offsetWidth;
+    letter.classList.add("is-kicked");
+    letter.addEventListener("animationend", () => letter.classList.remove("is-kicked"), { once: true });
+  });
+}
+
 function showImage(index) {
   currentImageIndex = (index + currentGallery.length) % currentGallery.length;
   const image = currentGallery[currentImageIndex];
