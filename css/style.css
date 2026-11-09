@@ -510,7 +510,7 @@ h1 {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 10px;
-  padding: 0 16px 16px;
+  padding: 0;
 }
 
 .nuwc-post-card {
@@ -523,23 +523,18 @@ h1 {
 }
 
 .nuwc-post-media {
-  display: grid;
   min-width: 0;
-  min-height: 240px;
-  place-items: center;
-  background: #ffffff;
 }
 
 .nuwc-post-media > img,
 .nuwc-gallery-trigger > img {
   display: block;
   width: 100%;
-  height: 240px;
-  object-fit: contain;
+  height: auto;
 }
 
 .nuwc-gallery-trigger {
-  height: 240px;
+  height: auto;
 }
 
 .nuwc-post-copy {
@@ -1135,10 +1130,14 @@ h1 {
     margin-bottom: 24px;
   }
 
-  .video-grid,
   .design-grid {
     grid-template-columns: 1fr;
     gap: 20px;
+  }
+
+  .video-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px 12px;
   }
 
   .nuwc-feature {
@@ -1156,16 +1155,6 @@ h1 {
 
   .nuwc-post-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    padding-inline: 10px;
-  }
-
-  .nuwc-post-media > img,
-  .nuwc-gallery-trigger > img {
-    height: 200px;
-  }
-
-  .nuwc-gallery-trigger {
-    height: 200px;
   }
 
   .nuwc-post-copy {
